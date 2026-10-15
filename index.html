@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>R-HDLO: Routing Hoses and Tubing Using Learned Predictive Dynamics</title>
+
+  <meta name="description" content="R-HDLO learns hose dynamics from four physics simulators, adapts a latent mechanics code from probing interactions, and plans goal-conditioned hose routing with sampling-based MPC." />
+  <meta name="keywords" content="R-HDLO, hose routing, deformable linear objects, learned dynamics, graph neural network, MPPI, multi-physics simulation, bimanual manipulation" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="R-HDLO: Routing Hoses and Tubing Using Learned Predictive Dynamics" />
+  <meta property="og:description" content="Cross-simulator hose dynamics learning and MPPI routing with self-crossings and many peg contacts." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://routing-hose.github.io/" />
+  <meta property="og:image" content="https://routing-hose.github.io/assets/img/posters/grid_avbd_g7_s402.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" />
+  <link rel="stylesheet" href="assets/css/site.css" />
+</head>
+<body>
+  <div class="page-progress-bar" aria-hidden="true"><div class="page-progress-bar-fill"></div></div>
+
+  <!-- ══════════ NAVBAR ══════════ -->
+  <nav class="navbar navbar-over-video" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="#top" style="font-weight:700;">R-HDLO</a>
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="mainNav">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="mainNav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="#abstract">Abstract</a>
+        <a class="navbar-item" href="#data">Simulators</a>
+        <a class="navbar-item" href="#dynamics">Dynamics</a>
+        <a class="navbar-item" href="#adapt">Adaptation</a>
+        <a class="navbar-item" href="#planning">MPPI</a>
+        <a class="navbar-item" href="#routing">Routing</a>
+        <a class="navbar-item" href="#real">Real hose</a>
+        <a class="navbar-item" href="#notes">Notes</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero hero-teaser-wrap" id="top">
+    <video class="teaser-video-bg" muted playsinline autoplay loop preload="auto" poster="assets/img/posters/teaser.jpg">
+      <source src="assets/videos/hero/teaser.mp4" type="video/mp4" />
+    </video>
+    <div class="teaser-overlay" aria-hidden="true"></div>
+    <button type="button" class="scroll-indicator" id="scroll-indicator-btn" aria-label="Scroll to content">
+      <span class="scroll-indicator-arrow"><i class="fas fa-chevron-down"></i></span>
+      <span>Scroll</span>
+    </button>
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <div class="hero-teaser-content">
+          <h1 class="title paper-title">R-HDLO: Routing Hoses and Tubing Using Learned Predictive Dynamics for Hollow Deformable Linear Objects</h1>
+          <p class="venue-badge">Under review</p>
+          <!-- TODO(authors): the paper is under double-blind review; fill in authors and affiliations at camera-ready. -->
+          <p class="author-list">Anonymous Authors</p>
+          <div class="link-buttons">
+            <a class="button is-dark is-static-link" href="#citation"><span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper (coming soon)</span></a>
+            <a class="button is-dark is-static-link" href="#citation"><span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv (coming soon)</span></a>
+            <a class="button is-dark is-static-link" href="#citation"><span class="icon"><i class="fab fa-github"></i></span><span>Code (coming soon)</span></a>
+            <a class="button is-link" href="#planning"><span class="icon"><i class="fas fa-cube"></i></span><span>Interactive MPPI demo</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ ABSTRACT ══════════ -->
+  <section id="abstract" class="section">
+    <div class="container" style="max-width:900px;">
+      <h2 class="section-heading">Abstract</h2>
+      <div class="section-divider"></div>
+      <div class="abstract-box">
+        Routing hoses and tubing requires predicting the dynamics of hollow deformable linear objects (HDLOs), which no single
+        simulator captures reliably. We present <strong>R-HDLO</strong>, a framework for goal-conditioned hose routing that learns
+        predictive dynamics across heterogeneous physics formulations and adapts them to unseen hoses through interaction.
+        R-HDLO trains one object-centric graph dynamics model on bimanual interaction data from four simulators
+        (Newton AVBD, an Isaac PhysX capsule chain, Newton XPBD and Genesis FEM), then infers and refines a latent mechanics code
+        from a few probing interactions with the current hose. On 39,559 held-out simulated hoses, the model trained on all four
+        simulators has the lowest average one-step error of every model we trained (1.72&nbsp;cm node RMSE vs 2.26&nbsp;cm for the best
+        single-simulator model; 1.86&nbsp;cm for a four-simulator model trained on the same total data budget as one simulator).
+        We plug the adapted model into MPPI for closed-loop routing with self-crossings, loops and many peg contacts.
+        On 260 paired simulated starts across 19 task cells and three executing simulators, MPPI with R-HDLO routes the hose on
+        <strong>114</strong> starts, against 90 for the best alternative model.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ OVERVIEW ══════════ -->
+  <section id="overview" class="section is-light-alt">
+    <div class="container" style="max-width:1100px;">
+      <h2 class="section-heading">Overview</h2>
+      <div class="section-divider"></div>
+      <div class="pipeline-flow">
+        <div class="pipe-step">4 physics<br/>simulators</div><div class="pipe-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="pipe-step">shared hose<br/>centreline graph</div><div class="pipe-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="pipe-step highlight">GNN dynamics<br/>+ latent z</div><div class="pipe-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="pipe-step highlight2">probe &amp; refit z<br/>to this hose</div><div class="pipe-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="pipe-step highlight">MPPI: 1,024 sampled<br/>bimanual actions</div><div class="pipe-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="pipe-step">execute, observe,<br/>replan</div>
+      </div>
+      <div class="columns is-vcentered" style="margin-top:1.5rem;">
+        <div class="column is-7">
+          <div class="media-container"><video class="lazy" data-src="assets/videos/grids/grid_avbd_g7_s402.mp4" poster="assets/img/posters/grid_avbd_g7_s402.jpg" muted loop playsinline controls preload="none"></video></div>
+        </div>
+        <div class="column is-5 content">
+          <p class="paper-abstract">
+            Each simulator discretizes a hose differently (capsule chains, particles, tetrahedral FEM) and carries its own
+            contact and bending biases. R-HDLO exports every simulator's states to the same hose centreline graph and learns a single
+            forward model from all of them. A latent code <em>z</em> conditions the model on the hose at hand; it is initialised
+            from six probing moves and refined from every observed transition. MPPI rolls the model out for 1,024 candidate
+            two-gripper action sequences per iteration and executes the best plan, then replans.
+          </p>
+          <p class="caption-small">
+            <span class="dot" style="background:#0072b2"></span>R-HDLO (ours)
+            <span class="dot" style="background:#56b4e9"></span>4-sim union
+            <span class="dot" style="background:#e69f00"></span>AVBD only
+            <span class="dot" style="background:#8c6d31"></span>PhysX only
+            <span class="dot" style="background:#d55e00"></span>XPBD only
+            <span class="dot" style="background:#7f7f7f"></span>FEM only<br/>
+            Left: one recorded start (task G7, a free alpha loop, AVBD executes) planned by MPPI with six different learned models.
+            Only ours closes the loop (17 actions); the others use the 30-action budget.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ MULTI-PHYSICS DATA ══════════ -->
+  <section id="data" class="section is-white-alt">
+    <div class="container" style="max-width:1150px;">
+      <h2 class="section-heading">Multi-Physics Hose Simulation</h2>
+      <div class="section-divider"></div>
+      <p class="section-lead">
+        The same kind of bimanual action, a grasp, three waypoints and a release, applied to hoses in four simulators that model
+        a hose in very different ways. Each clip replays one recorded transition from the simulator's own state at its native
+        resolution, with two YAM arms posed by inverse kinematics.
+      </p>
+      <div class="sim-grid">
+        <figure class="sim-cell"><div class="media-container"><video class="lazy" data-src="assets/videos/sims/newton_w8770_t39.mp4" muted loop playsinline preload="none"></video></div>
+          <figcaption><span class="dot" style="background:#e69f00"></span><b>Newton AVBD</b><br/>capsule rod, augmented vertex block descent</figcaption></figure>
+        <figure class="sim-cell"><div class="media-container"><video class="lazy" data-src="assets/videos/sims/isaac_w1433_t8.mp4" muted loop playsinline preload="none"></video></div>
+          <figcaption><span class="dot" style="background:#8c6d31"></span><b>Isaac PhysX</b><br/>articulated capsule chain</figcaption></figure>
+        <figure class="sim-cell"><div class="media-container"><video class="lazy" data-src="assets/videos/sims/xpbd_w4735_t13.mp4" muted loop playsinline preload="none"></video></div>
+          <figcaption><span class="dot" style="background:#d55e00"></span><b>Newton XPBD</b><br/>particle rod, extended position-based dynamics</figcaption></figure>
+        <figure class="sim-cell"><div class="media-container"><video class="lazy" data-src="assets/videos/sims/fem_w23629_t7.mp4" muted loop playsinline preload="none"></video></div>
+          <figcaption><span class="dot" style="background:#7f7f7f"></span><b>Genesis FEM</b><br/>volumetric finite elements</figcaption></figure>
+        <figure class="sim-cell"><div class="media-container"><video class="lazy" data-src="assets/videos/sims/newton_tet_w900078_t1.mp4" muted loop playsinline preload="none"></video></div>
+          <figcaption><span class="dot" style="background:#b0b0b0"></span><b>Newton VBD tet</b><br/>new FEM data lane (not used for training yet); also the FEM routing executor</figcaption></figure>
+      </div>
+      <div class="columns is-vcentered" style="margin-top:2rem;">
+        <div class="column is-7">
+          <div class="media-container"><video class="lazy" data-src="assets/videos/data/dataset_grid.mp4" muted loop playsinline preload="none"></video></div>
+        </div>
+        <div class="column is-5 content">
+          <h3 class="sub-heading">Training corpus</h3>
+          <p>100 random training hoses, 25 per simulator (top left AVBD, top right PhysX, bottom left XPBD, bottom right FEM), each
+            replaying 8 consecutive recorded actions. Hose length, radius, stiffness, friction and the peg layout are randomized per world.</p>
+          <table class="table is-narrow is-fullwidth stat-table">
+            <thead><tr><th>Simulator</th><th class="has-text-right">transitions</th><th class="has-text-right">worlds</th></tr></thead>
+            <tbody>
+              <tr><td><span class="dot" style="background:#e69f00"></span>Newton AVBD</td><td class="has-text-right">1,582,111</td><td class="has-text-right">92,898</td></tr>
+              <tr><td><span class="dot" style="background:#8c6d31"></span>Isaac PhysX</td><td class="has-text-right">1,162,509</td><td class="has-text-right">104,459</td></tr>
+              <tr><td><span class="dot" style="background:#d55e00"></span>Newton XPBD</td><td class="has-text-right">1,715,308</td><td class="has-text-right">138,454</td></tr>
+              <tr><td><span class="dot" style="background:#7f7f7f"></span>Genesis FEM</td><td class="has-text-right">1,279,450</td><td class="has-text-right">88,802</td></tr>
+              <tr class="total"><td>Total</td><td class="has-text-right">5,739,378</td><td class="has-text-right">424,613</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ DYNAMICS ══════════ -->
+  <section id="dynamics" class="section is-light-alt">
+    <div class="container" style="max-width:1150px;">
+      <h2 class="section-heading">Learned Hose Dynamics</h2>
+      <div class="section-divider"></div>
+      <p class="section-lead">
+        Given the hose centreline, the pegs, a two-gripper action and the latent <em>z</em>, the graph network predicts where every
+        node of the hose comes to rest after the action. The clips show held-out test hoses: the white tube is the simulator,
+        the coloured lines are the models' predicted final shape (drawn through the arms, X-ray style), and at the end of the
+        move the simulated result appears as a dark line with a white outline.
+      </p>
+
+      <div class="rv-task-bar" id="dyn-video-tabs" style="justify-content:center;">
+        <button class="rv-task-btn active" data-dyn-eng="newton">Newton AVBD worlds</button>
+        <button class="rv-task-btn" data-dyn-eng="isaac">Isaac PhysX worlds</button>
+        <button class="rv-task-btn" data-dyn-eng="xpbd">Newton XPBD worlds</button>
+        <button class="rv-task-btn" data-dyn-eng="fem">Genesis FEM worlds</button>
+      </div>
+      <div class="dyn-video-grid" id="dyn-video-grid"></div>
+      <p class="caption-small has-text-centered" style="margin-top:0.5rem;">
+        <span class="dot" style="background:#0072b2"></span>R-HDLO (ours)
+        <span class="dot" style="background:#e69f00"></span>AVBD only
+        <span class="dot" style="background:#8c6d31"></span>PhysX only
+        <span class="dot" style="background:#d55e00"></span>XPBD only
+        <span class="dot" style="background:#7f7f7f"></span>FEM only
+        &nbsp;·&nbsp; dashed: specialist models &nbsp;·&nbsp; examples selected; the averages are in the table below.
+      </p>
+
+      <!-- Interactive dynamics explorer -->
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Interactive: compare seven models on one action</h3>
+      <p class="rv-stage-hint has-text-centered">Pick a held-out hose, toggle models, and scrub through the recorded move.
+        <strong>Drag</strong> to orbit · <strong>Scroll</strong> to zoom.</p>
+      <div class="explorer-controls">
+        <select id="dyn-case" class="explorer-select" aria-label="test case"></select>
+        <button class="icon-btn" id="dyn-play" aria-label="play"><i class="fas fa-play"></i></button>
+        <input type="range" id="dyn-t" min="0" max="10" value="10" class="explorer-range" aria-label="time in the move" />
+      </div>
+      <div class="dyn-chips" id="dyn-models"></div>
+      <div class="columns" style="margin-top:0.5rem;">
+        <div class="column is-8">
+          <div class="retarget-canvas-wrap"><div id="dyn-three-host" class="three-host"></div></div>
+        </div>
+        <div class="column is-4">
+          <div class="rv-desc-box" id="dyn-info" style="margin-top:0;"></div>
+          <p class="bars-title">Node RMSE of the predicted final shape (this action)</p>
+          <div id="dyn-bars"></div>
+          <p class="caption-small">Grey: hose before the action. White: the simulator. Light-blue spheres: gripper targets during the move.</p>
+        </div>
+      </div>
+
+      <!-- Table I -->
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Held-out one-step error across simulators</h3>
+      <p class="rv-stage-hint has-text-centered">Mean node RMSE (cm) of the predicted final hose shape on 39,559 held-out test worlds
+        (AVBD 7,252 · PhysX 11,802 · XPBD 14,748 · FEM 5,757). Lower is better; bold = best in column.</p>
+      <div class="table-container">
+        <table class="table is-fullwidth is-hoverable results-table">
+          <thead><tr><th>Model (training data)</th><th>steps</th><th>AVBD</th><th>PhysX</th><th>XPBD</th><th>FEM</th><th>Average</th></tr></thead>
+          <tbody>
+            <tr class="ours"><td><span class="dot" style="background:#0072b2"></span>R-HDLO (all four simulators, all data)</td><td>160k</td><td><b>2.769</b></td><td>2.194</td><td>1.059</td><td><b>0.836</b></td><td><b>1.715</b></td></tr>
+            <tr><td><span class="dot" style="background:#56b4e9"></span>4-simulator union</td><td>80k</td><td>2.853</td><td>2.244</td><td>1.108</td><td>0.945</td><td>1.787</td></tr>
+            <tr><td><span class="dot" style="background:#009e73"></span>4-simulator, matched data budget</td><td>80k</td><td>2.994</td><td>2.309</td><td>1.147</td><td>0.999</td><td>1.862</td></tr>
+            <tr><td><span class="dot" style="background:#e69f00"></span>AVBD only</td><td>80k</td><td>2.787</td><td>2.882</td><td>1.829</td><td>1.533</td><td>2.258</td></tr>
+            <tr><td><span class="dot" style="background:#8c6d31"></span>PhysX only</td><td>80k</td><td>4.217</td><td>2.200</td><td>1.478</td><td>1.428</td><td>2.331</td></tr>
+            <tr><td><span class="dot" style="background:#d55e00"></span>XPBD only</td><td>80k</td><td>4.286</td><td>2.644</td><td><b>0.967</b></td><td>1.708</td><td>2.401</td></tr>
+            <tr><td><span class="dot" style="background:#7f7f7f"></span>FEM only</td><td>80k</td><td>4.185</td><td>3.054</td><td>1.854</td><td>1.032</td><td>2.531</td></tr>
+            <tr class="control"><td>Control: 4-simulator union trained 160k steps</td><td>160k</td><td>2.770</td><td><b>2.189</b></td><td>1.059</td><td>0.919</td><td>1.734</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption-small">Specialists are competitive on their own simulator (XPBD only is best on XPBD worlds) but degrade sharply
+        elsewhere; models trained on all four simulators are the most uniform. Our model trained 160k steps against 80k for the other rows;
+        at equal steps the union is 1.1% behind ours on average, almost all of it on FEM.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ADAPTATION ══════════ -->
+  <section id="adapt" class="section is-white-alt">
+    <div class="container" style="max-width:1100px;">
+      <h2 class="section-heading">Adapting to the Hose at Hand</h2>
+      <div class="section-divider"></div>
+      <div class="columns is-vcentered">
+        <div class="column is-7">
+          <div class="media-container"><video class="lazy" data-src="assets/videos/mppi/b1_xpbd_g1_probes.mp4" muted loop playsinline controls preload="none"></video></div>
+        </div>
+        <div class="column is-5 content">
+          <p>Before routing, the robot makes six short probing moves. The observed responses initialise the mechanics latent
+            <em>z</em>, which is then refined by gradient descent through the frozen dynamics model (80 Adam steps), and refit again
+            after every executed action. No simulator parameters are estimated.</p>
+          <table class="table is-narrow is-fullwidth stat-table">
+            <thead><tr><th>z used by the same frozen model</th><th class="has-text-right">avg RMSE</th></tr></thead>
+            <tbody>
+              <tr><td>refined from this hose's interactions</td><td class="has-text-right"><b>1.715 cm</b></td></tr>
+              <tr><td>encoder only (no refinement)</td><td class="has-text-right">1.743 cm</td></tr>
+              <tr><td>the simulator's mean z</td><td class="has-text-right">2.016 cm</td></tr>
+              <tr><td>another hose's z</td><td class="has-text-right">2.145 cm</td></tr>
+            </tbody>
+          </table>
+          <p class="caption-small">Held-out Table I worlds. A hose-specific z helps every model we tested. Much of what z captures
+            identifies the simulator, rather than material constants.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ MPPI PLANNING ══════════ -->
+  <section id="planning" class="section is-light-alt">
+    <div class="container" style="max-width:1150px;">
+      <h2 class="section-heading">Planning with MPPI</h2>
+      <div class="section-divider"></div>
+      <p class="section-lead">
+        At every step MPPI samples 1,024 two-gripper action sequences (horizon 2), rolls each out through R-HDLO, scores the forecast
+        hose against the routing goal, and refines the sampling distribution over a few iterations. A final check compares the
+        weighted-mean plan, the best sample and not moving at all; the lowest-cost one is executed, and the robot replans from
+        the observed hose.
+      </p>
+
+      <h3 class="sub-heading has-text-centered">Interactive: what the planner considered</h3>
+      <p class="rv-stage-hint has-text-centered">Step through a recorded routing run. Each iteration shows the 32 lowest-cost forecast
+        hoses (green = low cost) and their gripper paths; <em>Final check</em> shows the three candidates; <em>Executed</em> compares
+        the forecast of the chosen action with what the simulator did. <strong>Drag</strong> to orbit · <strong>Scroll</strong> to zoom.</p>
+      <div class="rv-stage-bar" style="max-width:820px;margin:0 auto 0.8rem;">
+        <button class="rv-stage-btn active" data-mppi-ep="xpbd_g1">G1 · clamped return around four pegs<br/><small>Newton XPBD executes</small></button>
+        <button class="rv-stage-btn" data-mppi-ep="fem_g4">G4 · clamped looped peg-winding<br/><small>FEM (VBD tet) executes</small></button>
+        <button class="rv-stage-btn" data-mppi-ep="avbd_g7">G7 · free alpha loop<br/><small>Newton AVBD executes</small></button>
+      </div>
+      <div class="explorer-controls">
+        <button class="icon-btn" id="mppi-prev" aria-label="previous step"><i class="fas fa-backward-step"></i></button>
+        <button class="icon-btn" id="mppi-play" aria-label="play"><i class="fas fa-play"></i></button>
+        <button class="icon-btn" id="mppi-next" aria-label="next step"><i class="fas fa-forward-step"></i></button>
+        <input type="range" id="mppi-step" min="0" max="20" value="0" class="explorer-range" aria-label="MPPI step" />
+        <span id="mppi-step-label" class="step-label"></span>
+      </div>
+      <div class="rv-task-bar" style="justify-content:center;">
+        <button class="rv-task-btn active" data-mppi-phase="iter0">Iteration 1</button>
+        <button class="rv-task-btn" data-mppi-phase="iter1">Iteration 2</button>
+        <button class="rv-task-btn" data-mppi-phase="iter2">Iteration 3</button>
+        <button class="rv-task-btn" data-mppi-phase="iter3">Iteration 4</button>
+        <button class="rv-task-btn" data-mppi-phase="final">Final check</button>
+        <button class="rv-task-btn" data-mppi-phase="result">Executed</button>
+        <label class="check"><input type="checkbox" id="mppi-show-paths" checked /> gripper paths</label>
+      </div>
+      <div class="rv-task-bar" id="mppi-planner-row" style="justify-content:center;">
+        <span class="step-label">Plan the first step with:</span>
+        <button class="rv-task-btn active" data-mppi-planner="ours">R-HDLO (ours)</button>
+        <button class="rv-task-btn" data-mppi-planner="specialist">XPBD-only model</button>
+      </div>
+      <div class="retarget-canvas-wrap"><div id="mppi-three-host" class="three-host tall"></div></div>
+      <div class="rv-desc-box" id="mppi-info"></div>
+      <div class="mppi-legend" id="mppi-legend"></div>
+
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Rendered episodes</h3>
+      <p class="rv-stage-hint has-text-centered">The same three runs, rendered. Expanded steps show every iteration's forecasts and
+        ghost grippers; the chosen plan is magenta. Jump to a chapter below the video.</p>
+      <div class="rv-task-bar" style="justify-content:center;" id="ep-tabs">
+        <button class="rv-task-btn active" data-ep="b1_xpbd_g1">G1 · XPBD</button>
+        <button class="rv-task-btn" data-ep="b1_fem_g4">G4 · FEM</button>
+        <button class="rv-task-btn" data-ep="b1_avbd_g7">G7 · AVBD</button>
+      </div>
+      <div class="media-container" style="max-width:960px;margin:0 auto;">
+        <video id="ep-video" controls muted playsinline preload="metadata" poster="assets/img/posters/b1_xpbd_g1.jpg">
+          <source src="assets/videos/mppi/b1_xpbd_g1.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="chapters" id="ep-chapters"></div>
+      <p class="caption-small has-text-centered" id="ep-caption"></p>
+
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Same state, two planners</h3>
+      <div class="columns">
+        <div class="column"><div class="media-container"><video class="lazy" data-src="assets/videos/mppi/b2_ours_phase0.mp4" muted loop playsinline controls preload="none"></video></div>
+          <p class="caption-small has-text-centered"><span class="dot" style="background:#0072b2"></span>MPPI with R-HDLO: goal reached after 21 actions</p></div>
+        <div class="column"><div class="media-container"><video class="lazy" data-src="assets/videos/mppi/b2_xpbd_phase0.mp4" muted loop playsinline controls preload="none"></video></div>
+          <p class="caption-small has-text-centered"><span class="dot" style="background:#d55e00"></span>MPPI with the XPBD-only model: not routed after 30 actions</p></div>
+      </div>
+      <p class="caption-small has-text-centered">Both runs start from the identical recorded hose state (G1, XPBD executes, seed 404); the clips show the first planning step and its execution.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ ROUTING RESULTS ══════════ -->
+  <section id="routing" class="section is-white-alt">
+    <div class="container" style="max-width:1150px;">
+      <h2 class="section-heading">Routing Results</h2>
+      <div class="section-divider"></div>
+      <p class="section-lead">
+        Eight routing goals with self-crossings, loops and dense peg contact, on hoses of different mechanics, executed by three
+        simulators (Newton AVBD, Newton XPBD and Newton VBD tet FEM). Every model plans with the identical MPPI controller from the
+        same recorded starts; only the dynamics model changes.
+      </p>
+
+      <h3 class="sub-heading has-text-centered">Same start, six planners</h3>
+      <div class="rv-task-bar" style="justify-content:center;" id="grid-tabs">
+        <button class="rv-task-btn active" data-grid="grid_avbd_g7_s402">G7 alpha loop · AVBD</button>
+        <button class="rv-task-btn" data-grid="grid_avbd_g4_s404">G4 looped winding · AVBD</button>
+        <button class="rv-task-btn" data-grid="grid_xpbd_g1_s404">G1 four-peg return · XPBD</button>
+        <button class="rv-task-btn" data-grid="grid_fem_g4_s404">G4 looped winding · FEM</button>
+      </div>
+      <div class="grid-wrap">
+        <div class="media-container"><video id="grid-video" controls muted loop playsinline preload="metadata" poster="assets/img/posters/grid_avbd_g7_s402.jpg">
+          <source src="assets/videos/grids/grid_avbd_g7_s402.mp4" type="video/mp4" /></video></div>
+        <div class="grid-legend" id="grid-legend"></div>
+      </div>
+      <p class="caption-small has-text-centered" id="grid-caption"></p>
+
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Pooled over 260 paired starts</h3>
+      <div class="columns">
+        <div class="column is-7">
+          <div class="bar-chart" id="routing-bars"></div>
+        </div>
+        <div class="column is-5 content">
+          <table class="table is-narrow is-fullwidth stat-table">
+            <thead><tr><th>ours only : other only</th><th class="has-text-right">starts</th><th class="has-text-right">sign test</th></tr></thead>
+            <tbody>
+              <tr><td>vs 4-sim union</td><td class="has-text-right">39 : 15</td><td class="has-text-right">p = .0015</td></tr>
+              <tr><td>vs AVBD only</td><td class="has-text-right">45 : 21</td><td class="has-text-right">p = .0043</td></tr>
+              <tr><td>vs XPBD only</td><td class="has-text-right">58 : 13</td><td class="has-text-right">p &lt; .001</td></tr>
+              <tr><td>vs PhysX only</td><td class="has-text-right">64 : 8</td><td class="has-text-right">p &lt; .001</td></tr>
+              <tr><td>vs FEM only</td><td class="has-text-right">69 : 12</td><td class="has-text-right">p &lt; .001</td></tr>
+            </tbody>
+          </table>
+          <p class="caption-small">Exact two-sided sign tests on starts where exactly one of the two planners succeeds (Holm-adjusted over
+            the four specialists; the union test is unadjusted). Light bars: the same counts when every success whose recorded hose
+            passes through a peg is counted as a failure (32 of 303 AVBD successes; none on XPBD or FEM).</p>
+        </div>
+      </div>
+
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Task gallery</h3>
+      <p class="rv-stage-hint has-text-centered">One successful run of R-HDLO per task cell, each from its own recorded start.</p>
+      <div class="gallery-grid" id="task-gallery"></div>
+
+      <h3 class="sub-heading has-text-centered" style="margin-top:2.5rem;">Where it fails</h3>
+      <div class="columns is-multiline">
+        <div class="column is-4">
+          <div class="pair"><div class="media-container"><video class="lazy" data-src="assets/videos/failures/avbd_G8_V2S2_404_avbd.mp4" muted loop playsinline preload="none"></video></div>
+          <div class="media-container"><video class="lazy" data-src="assets/videos/failures/avbd_G8_V2S2_404_ours_p27-30.mp4" muted loop playsinline preload="none"></video></div></div>
+          <p class="caption-small"><b>A specialist wins.</b> G8, AVBD executes: the AVBD-only model routes this start in 11 actions (top);
+            ours (bottom, its last actions) uses the full budget. On G8 AVBD only routes 6 of 16 starts vs 4 for ours.</p>
+        </div>
+        <div class="column is-4">
+          <div class="pair"><div class="media-container"><video class="lazy" data-src="assets/videos/failures/fem_G4_V3F1_404_xpbd.mp4" muted loop playsinline preload="none"></video></div>
+          <div class="media-container"><video class="lazy" data-src="assets/videos/failures/fem_G4_V3F1_404_ours_p00-04.mp4" muted loop playsinline preload="none"></video></div></div>
+          <p class="caption-small"><b>The simulator breaks.</b> G4, FEM executes: with the XPBD-only planner the FEM executor fails on action 4
+            (top; the invalid state is not shown); ours on the same start (bottom) goes on to route it. 334 of 504 FEM trials ended in a simulator failure.</p>
+        </div>
+        <div class="column is-4">
+          <div class="pair"><div class="media-container"><video class="lazy" data-src="assets/videos/failures/xpbd_G5_V3X1_401_ours_p26-30.mp4" muted loop playsinline preload="none"></video></div>
+          <div class="media-container"><video class="lazy" data-src="assets/videos/failures/xpbd_G5_V3X1_401_xpbd_p26-30.mp4" muted loop playsinline preload="none"></video></div></div>
+          <p class="caption-small"><b>Nobody solves it.</b> G5 dense six-peg slalom, XPBD executes: all six planners route 0 of 12 starts.
+            The last actions of ours (top) and of XPBD only (bottom), both at the budget.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ REAL HOSE ══════════ -->
+  <section id="real" class="section is-light-alt">
+    <div class="container" style="max-width:1100px;">
+      <h2 class="section-heading">Real Hose, Real Robot</h2>
+      <div class="section-divider"></div>
+      <p class="section-lead">A bimanual YAM rig moves a real hose. Drag the slider on the overhead photo to compare the hose before and
+        after the move; the render beside it replays the robot at its recorded joint angles with the tracked hose.</p>
+      <div class="rv-task-bar" style="justify-content:center;" id="real-tabs"></div>
+      <div class="columns is-vcentered">
+        <div class="column is-6">
+          <div class="compare" id="real-compare">
+            <img class="compare-img" id="real-post" alt="overhead photo after the move" />
+            <div class="compare-top" id="real-top"><img class="compare-img" id="real-pre" alt="overhead photo before the move" /></div>
+            <input type="range" min="0" max="100" value="50" class="compare-range" id="real-range" aria-label="before / after" />
+            <span class="compare-tag left">before</span><span class="compare-tag right">after</span>
+          </div>
+        </div>
+        <div class="column is-6">
+          <div class="media-container"><video id="real-video" muted loop playsinline autoplay preload="metadata"></video></div>
+        </div>
+      </div>
+      <p class="caption-small has-text-centered" id="real-caption"></p>
+      <div class="columns" style="margin-top:1rem;">
+        <div class="column is-6 is-offset-3">
+          <table class="table is-narrow is-fullwidth stat-table">
+            <thead><tr><th>One-step shape forecast on the real hose (10 sessions, 99 moves)</th><th class="has-text-right">RMSE</th></tr></thead>
+            <tbody>
+              <tr><td>sim-trained model, z refined from the session's earlier moves</td><td class="has-text-right"><b>4.879 cm</b></td></tr>
+              <tr><td>same model, encoder z</td><td class="has-text-right">4.973 cm</td></tr>
+              <tr><td>same model, z = 0</td><td class="has-text-right">5.280 cm</td></tr>
+              <tr><td>linear action map fit on the other sessions</td><td class="has-text-right">5.720 cm</td></tr>
+            </tbody>
+          </table>
+          <p class="caption-small">Refined z beats the linear map in 9 of 10 sessions (difference −0.84 cm, 95% CI [−1.16, −0.60]).
+            This is the earlier sim-trained routing model (v2), not the four-simulator R-HDLO checkpoint, and it measures one-step
+            shape prediction, not routing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ NOTES ══════════ -->
+  <section id="notes" class="section is-white-alt">
+    <div class="container" style="max-width:900px;">
+      <h2 class="section-heading">Notes on the Videos and Results</h2>
+      <div class="section-divider"></div>
+      <div class="content notes">
+        <ul>
+          <li><b>Arms are for visualization.</b> In simulation the grasps are virtual (no arm is simulated); the YAM arms are posed
+            by inverse kinematics on the recorded gripper motion. An arm that cannot reach a waypoint, or would intersect the other
+            arm, is drawn faded.</li>
+          <li><b>Hose motion.</b> Settled states are recorded by the executing simulator. During moves the hose is re-simulated by
+            that simulator where the replay matches the record within 2 mm, and linearly interpolated otherwise (always for FEM).
+            Where the hose wraps a peg the drawn tube can overlap the peg edge by a few millimetres.</li>
+          <li><b>MPPI candidates</b> come from an offline re-plan from the recorded states with the frozen model and recorded random
+            stream; it reproduces the recorded selections on the steps shown.</li>
+          <li><b>Selected examples.</b> Individual clips are chosen to show the method clearly (often for margin); the tables report
+            averages and counts over all trials.</li>
+          <li><b>Routing results are in simulation only.</b> There is no PhysX executor. Task cells G1–G4 were chosen on development
+            seeds with the four-simulator union model; on G5–G8 ours vs AVBD only is 13 : 11 (not significant), and the AVBD-only
+            (21 : 15) and FEM-only (16 : 6) executor splits are not significant on their own. Ours trained 160k steps, the other
+            models 80k. The FEM executor is Newton VBD tet, on which no model was trained; a FEM success means the goal was reached
+            before the simulator failed.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ CITATION ══════════ -->
+  <section id="citation" class="section is-light-alt">
+    <div class="container" style="max-width:900px;">
+      <h2 class="section-heading">Citation</h2>
+      <div class="section-divider"></div>
+      <pre class="bibtex">@inproceedings{rhdlo2027,
+  title     = {R-HDLO: Routing Hoses and Tubing Using Learned Predictive Dynamics
+               for Hollow Deformable Linear Objects},
+  author    = {Anonymous Authors},
+  booktitle = {Under review},
+  year      = {2026}
+}</pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p><strong style="color:rgba(255,255,255,.85);">R-HDLO</strong> — Routing Hoses and Tubing Using Learned Predictive Dynamics</p>
+      <p style="font-size:0.82rem;margin-top:0.5rem;">Renders: Blender Cycles. Interactive viewers: three.js.</p>
+    </div>
+  </footer>
+
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+  </script>
+  <script type="module" src="assets/js/mppi-explorer.mjs"></script>
+  <script type="module" src="assets/js/dynamics-explorer.mjs"></script>
+  <script src="assets/js/site.js"></script>
+</body>
+</html>
