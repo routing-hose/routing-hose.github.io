@@ -38,7 +38,13 @@ export function costColor(t) {          // 0 = lowest cost (green) -> amber -> r
 export class Viewer {
   constructor(host, { background = 0x14161b } = {}) {
     this.host = host;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    try {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    } catch (e) {
+      host.innerHTML = '<p style="color:#aab0b9;padding:2rem;text-align:center;font-size:.9rem;">This interactive viewer needs WebGL, ' +
+        'which this browser has turned off. The rendered videos on this page show the same data.</p>';
+      throw e;
+    }
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(background, 1);
     host.appendChild(this.renderer.domElement);
@@ -58,7 +64,13 @@ export class Viewer {
     this.scene.add(this.static);
     new ResizeObserver(() => this.resize()).observe(host);
     this.resize();
-    const loop = () => { this.controls.update(); this.renderer.render(this.scene, this.camera); requestAnimationFrame(loop); };
+    // render only while on screen: two always-on WebGL loops cost real battery on a long page
+    this.visible = false;
+    new IntersectionObserver(es => { this.visible = es[0].isIntersecting; }, { rootMargin: '100px 0px' }).observe(host);
+    const loop = () => {
+      if (this.visible) { this.controls.update(); this.renderer.render(this.scene, this.camera); }
+      requestAnimationFrame(loop);
+    };
     loop();
   }
   resize() {
