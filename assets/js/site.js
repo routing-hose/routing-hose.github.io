@@ -204,15 +204,15 @@
         'is drawn first (blue), then the forecast on the encoder\'s <em>z</em> (red) and on the refined <em>z</em> (green), and only then does ' +
         'the hose move to where the camera found it; the grey line marks the no-motion baseline. During routing, each move\'s forecast ' +
         '(magenta) stays beside the hose the camera found: 29.4&nbsp;mm mean error against 63.5&nbsp;mm for no motion.' },
-    ga: { video: 'assets/videos/real/ga_film.mp4', poster: 'assets/img/posters/ga_film.jpg', pre: 'ga_start', post: 'ga_final',
-      ch: [{ t0: 0, label: 'start' }, { t0: 3.0, label: 'probe' }, { t0: 7.9, label: 'move 1', plan: 1 }, { t0: 18.2, label: 'move 2', plan: 1 },
-           { t0: 26.8, label: 'move 3', plan: 1 }, { t0: 36.3, label: 'move 4', plan: 1 }, { t0: 46.6, label: 'move 5', plan: 1 },
-           { t0: 56.8, label: 'move 6', plan: 1 }, { t0: 66.8, label: 'routed' }],
-      cap: '<b>Hose 5, three-peg route.</b> Overhead camera only, with the goal line (green) and pegs (red) drawn on the image; moves at 2&times; ' +
-        'speed, planning time cut. The 11&nbsp;mm hose leaves a fixture block and must pass the three pegs on alternating sides. Six MPPI moves take ' +
-        'the routing cost from 18.1 to 0: the middle peg is routed on move 4, and move 6 carries the free end past the right peg. All three peg sides ' +
-        'hold in the observation after the grippers release. No calibration probe was usable on this start (the one attempted barely moved the hose), ' +
-        'so the run planned with the encoder&rsquo;s <em>z</em> alone. It is not one of the trials counted in the table.' },
+    ga: { video: 'assets/videos/real/ga_run.mp4', poster: 'assets/img/posters/ga_run.jpg', pre: 'ga_start', post: 'ga_final',
+      ch: [{ t0: 3.5, label: 'probe' }, { t0: 11.3, label: 'move 1', plan: 1 }, { t0: 49.6, label: 'move 2', plan: 1 },
+           { t0: 84.2, label: 'move 3', plan: 1 }, { t0: 121.0, label: 'move 4', plan: 1 }, { t0: 159.1, label: 'move 5', plan: 1 },
+           { t0: 197.2, label: 'move 6', plan: 1 }, { t0: 231.9, label: 'routed' }],
+      cap: '<b>Hose 5, three-peg route.</b> The 11&nbsp;mm hose leaves a fixture block and must pass three pegs on alternating sides, on a rearranged board. ' +
+        'Six MPPI moves take the routing cost from 18.2 to 0: the middle peg is routed on move 4, and move 6 carries the free end past the right peg. ' +
+        'All three peg sides hold in the observation after the grippers release. The one calibration probe attempted barely moved the hose and was ' +
+        'discarded, so the run planned with the encoder&rsquo;s <em>z</em> alone. The fixture block is not drawn in the reconstruction. ' +
+        'It is not one of the trials counted in the table.' },
     g1: { video: 'assets/videos/real/g1_run.mp4', poster: 'assets/img/posters/g1_run.jpg', pre: 'g1_start', post: 'g1_final',
       ch: [{ t0: 3.5, label: 'probes' }, { t0: 10.3, label: 'fit z' }, { t0: 12.8, label: 'move 1', plan: 1 }, { t0: 40.0, label: 'move 2', plan: 1 },
            { t0: 67.0, label: 'move 3', plan: 1 }, { t0: 93.9, label: 'move 4', plan: 1 }, { t0: 120.9, label: 'move 5', plan: 1 }],

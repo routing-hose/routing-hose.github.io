@@ -455,7 +455,7 @@
       </div>
 
       <h3 class="sub-heading has-text-centered" style="margin-top:2rem;">Physical runs</h3>
-      <p class="rv-stage-hint has-text-centered">Goal 5 and Goal 1 videos, left half: the run rebuilt in Blender from its own log &mdash; candidate moves as ghost
+      <p class="rv-stage-hint has-text-centered">Videos, left half: the run rebuilt in Blender from its own log &mdash; candidate moves as ghost
         arms coloured by MPPI cost (green = low), the chosen plan and its forecast in magenta. Right half: the overhead camera, unedited and synchronised.</p>
       <div class="rv-task-bar" style="justify-content:center;" id="real-tabs">
         <button class="rv-task-btn active" data-real="g5">Hose 6 · Goal 5</button>
@@ -494,11 +494,12 @@
         <ul>
           <li><b>Tables come from the paper.</b> Prediction metrics are means &plusmn; population SD of world-level scores for one fixed
             trained model per row (not across training seeds). Routing entries are success rate / mean final normalized routing cost.</li>
-          <li><b>Real-world videos.</b> The Blender half of the Goal&nbsp;5 and Goal&nbsp;1 videos is rebuilt from each run's log: the hose is the tracker's
+          <li><b>Real-world videos.</b> The Blender half of every real-world video is rebuilt from that run's log: the hose is the tracker's
             centerline and the arms are posed by the rig's own inverse kinematics from the recorded commands. The Goal&nbsp;1 video shows one
             attempt that the operator stopped after five moves without routing every peg; it illustrates
-            the setup and the planner, not a successful trial. The three-peg route video is the overhead camera's footage, with
-            the goal and pegs projected through the camera calibration; it shows a later run on a rearranged board that routed all three pegs.</li>
+            the setup and the planner, not a successful trial. The three-peg route video shows a later run on a
+            rearranged board that routed all three pegs; its arm timing is rebuilt from the session log, which records every move and
+            gravity-sag trim but not how long the arms took to settle, so that one number is fitted per move to the overhead film.</li>
           <li><b>Arms in simulation are for visualisation.</b> Simulated grasps are kinematic; the YAM arms are posed by inverse kinematics
             on the recorded gripper motion. An arm that cannot reach a waypoint, or would intersect the other arm, is drawn faded.</li>
           <li><b>Simulated hose motion.</b> Settled states are recorded by the executing simulator. During moves the hose is re-simulated
