@@ -213,12 +213,13 @@
         'the routing cost from 18.1 to 0: the middle peg is routed on move 4, and move 6 carries the free end past the right peg. All three peg sides ' +
         'hold in the observation after the grippers release. No calibration probe was usable on this start (the one attempted barely moved the hose), ' +
         'so the run planned with the encoder&rsquo;s <em>z</em> alone. It is not one of the trials counted in the table.' },
-    g1: { video: 'assets/videos/real/g1_film.mp4', poster: 'assets/img/posters/g1_film.jpg', pre: 'g1_start', post: 'g1_final',
-      ch: [{ t0: 0, label: 'probes' }, { t0: 20.2, label: 'move 1', plan: 1 }, { t0: 31.7, label: 'move 2', plan: 1 },
-           { t0: 42.9, label: 'move 3', plan: 1 }, { t0: 54.1, label: 'move 4', plan: 1 }, { t0: 65.3, label: 'move 5', plan: 1 }],
-      cap: '<b>Hose 5, Goal 1.</b> Overhead camera only, about 1.7&times; speed. An 11&nbsp;mm hose held in a fixture block, routed around three pegs on the board. This attempt ' +
-        'made five MPPI moves, lowering the routing cost from 11.3 to 2.0, before the operator stopped it; not every peg was routed, ' +
-        'so it is not one of the successful trials counted in the table.' }
+    g1: { video: 'assets/videos/real/g1_run.mp4', poster: 'assets/img/posters/g1_run.jpg', pre: 'g1_start', post: 'g1_final',
+      ch: [{ t0: 3.5, label: 'probes' }, { t0: 10.3, label: 'fit z' }, { t0: 12.8, label: 'move 1', plan: 1 }, { t0: 40.0, label: 'move 2', plan: 1 },
+           { t0: 67.0, label: 'move 3', plan: 1 }, { t0: 93.9, label: 'move 4', plan: 1 }, { t0: 120.9, label: 'move 5', plan: 1 }],
+      cap: '<b>Hose 5, Goal 1.</b> An 11&nbsp;mm hose held in a fixture block, routed around three pegs on the board. Two calibration probes ' +
+        'ran (the fixture tether refused two more), then five MPPI moves lowered the routing cost from 10.9 to 2.0 before the operator stopped ' +
+        'the attempt; not every peg was routed, so it is not one of the successful trials counted in the table. The fixture block is not ' +
+        'drawn in the reconstruction (the run logged no geometry for it).' }
   };
   var realVid = $('#real-video');
   function setReal(k) {
