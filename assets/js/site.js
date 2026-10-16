@@ -204,6 +204,14 @@
         'is drawn first (blue), then the forecast on the encoder\'s <em>z</em> (red) and on the refined <em>z</em> (green), and only then does ' +
         'the hose move to where the camera found it; the grey line marks the no-motion baseline. During routing, each move\'s forecast ' +
         '(magenta) stays beside the hose the camera found: 29.4&nbsp;mm mean error against 63.5&nbsp;mm for no motion.' },
+    ga: { video: 'assets/videos/real/ga_film.mp4', poster: 'assets/img/posters/ga_film.jpg', pre: 'ga_start', post: 'ga_final',
+      ch: [{ t0: 0, label: 'start' }, { t0: 3.0, label: 'probes' }, { t0: 13.8, label: 'move 1', plan: 1 }, { t0: 25.4, label: 'move 2', plan: 1 },
+           { t0: 35.3, label: 'move 3', plan: 1 }, { t0: 46.2, label: 'move 4', plan: 1 }, { t0: 56.7, label: 'move 5', plan: 1 },
+           { t0: 66.8, label: 'final state' }],
+      cap: '<b>Hose 5, three-peg route.</b> Overhead camera only, with the goal line (green) and pegs (red) drawn on the image; probes at 4&times; ' +
+        'and moves at 2&times; speed, planning time cut. The 11&nbsp;mm hose leaves a fixture block and must pass the three pegs on alternating sides. ' +
+        'After two calibration probes, five MPPI moves take the routing cost from 16.1 to 1.2: the left and middle pegs are routed, and the free end ' +
+        'comes up on the correct side of the right peg but stops against it, about 80&nbsp;mm short of the goal. Not fully routed, and not counted in the table.' },
     g1: { video: 'assets/videos/real/g1_film.mp4', poster: 'assets/img/posters/g1_film.jpg', pre: 'g1_start', post: 'g1_final',
       ch: [{ t0: 0, label: 'probes' }, { t0: 20.2, label: 'move 1', plan: 1 }, { t0: 31.7, label: 'move 2', plan: 1 },
            { t0: 42.9, label: 'move 3', plan: 1 }, { t0: 54.1, label: 'move 4', plan: 1 }, { t0: 65.3, label: 'move 5', plan: 1 }],
